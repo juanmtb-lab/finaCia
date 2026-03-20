@@ -65,7 +65,7 @@
             <div class="charts-grid">
                 <div class="chart-container glass">
                     <div class="chart-header">
-                        <h3 class="chart-title" id="chart-title">Evolución del Beneficio Mensual</h3>
+                        <h3 class="chart-title" id="chart-title">Beneficio Neto Mensual</h3>
                     </div>
                     <div class="chart-wrapper">
                         <canvas id="profitChart"></canvas>
@@ -98,16 +98,17 @@
             </div>
         </section>
 
-        <section class="transactions-section glass">
-            <div class="section-header">
-                <h2 class="section-title">Últimos Movimientos de Negocio</h2>
-                <div class="table-filters">
-                    <button class="tab-btn active" data-filter="all">Todas</button>
-                    <button class="tab-btn" data-filter="Venta">Ventas</button>
-                    <button class="tab-btn" data-filter="Compra">Compras</button>
+            <div class="transactions-section glass">
+                <div class="table-header">
+                    <h3 class="section-title">Últimos movimientos de Negocio</h3>
+                    <div class="table-filters">
+                        <button class="tab-btn active" data-filter="all">Todas</button>
+                        <button class="tab-btn" data-filter="Venta">Ventas</button>
+                        <button class="tab-btn" data-filter="Compra">Compras</button>
+                        <button class="tab-btn" data-filter="Publicidad">Publicidad</button>
+                    </div>
                 </div>
-            </div>
-            <div class="table-wrapper">
+                <div class="table-wrapper">
                 <table id="transactions-table">
                     <thead>
                         <tr>
@@ -122,7 +123,7 @@
                     </tbody>
                 </table>
             </div>
-        </section>
+        </div>
     </main>
 
         <nav class="mobile-nav">

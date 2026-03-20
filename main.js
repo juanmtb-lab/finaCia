@@ -22,7 +22,7 @@ class Dashboard {
     }
 
     checkAuth() {
-        const isAuth = localStorage.getItem('dashboard_auth') === 'true';
+        const isAuth = localStorage.getItem('financIA_auth') === 'true';
         if (isAuth) {
             document.getElementById('login-overlay').classList.add('hidden');
             document.getElementById('app').classList.remove('hidden');
@@ -37,7 +37,7 @@ class Dashboard {
         
         const handleLogin = () => {
             if (passInput.value === this.password) {
-                localStorage.setItem('dashboard_auth', 'true');
+                localStorage.setItem('financIA_auth', 'true');
                 document.getElementById('login-overlay').classList.add('hidden');
                 document.getElementById('app').classList.remove('hidden');
                 this.fetchData();

@@ -144,7 +144,60 @@ class Dashboard {
     renderAll() {
         this.renderMetrics();
         this.renderChart();
+        this.renderDistributionChart();
         this.renderTable();
+    }
+
+    renderDistributionChart() {
+        const ctx = document.getElementById('distributionChart').getContext('2d');
+        if (this.distChart) this.distChart.destroy();
+
+        const sales = this.data.metrics.sales;
+        const investment = this.data.metrics.purchases + this.data.metrics.ads;
+
+        this.distChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Ventas', 'Inversión (Compras + Ads)'],
+                datasets: [{
+                    data: [sales, investment],
+                    backgroundColor: ['rgba(56, 189, 248, 0.7)', 'rgba(244, 63, 94, 0.7)'],
+                    borderColor: ['#38bdf8', '#f43f5e'],
+                    borderWidth: 2,
+                    hoverOffset: 15
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            color: '#94a3b8',
+                            font: { family: 'Outfit', size: 12 },
+                            padding: 20
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(15, 23, 42, 0.95)',
+                        padding: 12,
+                        cornerRadius: 12,
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.label || '';
+                                if (label) label += ': ';
+                                if (context.parsed !== null) {
+                                    label += '€' + context.parsed.toLocaleString('es-ES');
+                                }
+                                return label;
+                            }
+                        }
+                    }
+                },
+                cutout: '70%'
+            }
+        });
     }
 
     renderMetrics() {

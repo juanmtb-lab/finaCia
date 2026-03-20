@@ -2,9 +2,11 @@
 const heads = $input.all()[0].json.headers || {};
 const apiKey = 'finacia_secret_key_2026';
 
-// 1. Verificación de Seguridad
-if (heads['x-dashboard-key'] !== apiKey) {
-  throw new Error("No autorizado: API Key inválida o ausente");
+// 1. Verificación de Seguridad (Soporta varias mayúsculas/minúsculas)
+const receivedKey = heads['x-dashboard-key'] || heads['X-Dashboard-Key'] || heads['X-DASHBOARD-KEY'];
+
+if (receivedKey !== apiKey) {
+  throw new Error(`API Key inválida o ausente (Recibido: ${receivedKey ? 'SI' : 'NO'})`);
 }
 
 const inputData = $input.all();

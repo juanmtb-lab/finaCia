@@ -64,7 +64,7 @@ class Dashboard {
         try {
             const response = await fetch('https://n8n.10tacle.app/webhook/finacia-unified-data', {
                 headers: {
-                    'x-dashboard-key': this.apiKey
+                    'X-Dashboard-Key': this.apiKey
                 }
             });
             if (!response.ok) throw new Error("Acceso denegado o error de servidor");

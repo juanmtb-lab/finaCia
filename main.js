@@ -22,7 +22,7 @@ class Dashboard {
     }
 
     checkAuth() {
-        const isAuth = localStorage.getItem('financIA_auth') === 'true';
+        const isAuth = localStorage.getItem('FinancIA_Auth_v3') === 'true';
         if (isAuth) {
             document.getElementById('login-overlay').classList.add('hidden');
             document.getElementById('app').classList.remove('hidden');
@@ -37,7 +37,7 @@ class Dashboard {
         
         const handleLogin = () => {
             if (passInput.value === this.password) {
-                localStorage.setItem('financIA_auth', 'true');
+                localStorage.setItem('FinancIA_Auth_v3', 'true');
                 document.getElementById('login-overlay').classList.add('hidden');
                 document.getElementById('app').classList.remove('hidden');
                 this.fetchData();
@@ -64,7 +64,7 @@ class Dashboard {
         try {
             const response = await fetch('https://n8n.10tacle.app/webhook/finacia-unified-data', {
                 headers: {
-                    'X-Dashboard-Key': this.apiKey
+                    'x-dashboard-key': this.apiKey
                 }
             });
             if (!response.ok) throw new Error("Acceso denegado o error de servidor");

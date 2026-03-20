@@ -1,9 +1,9 @@
 /* NODES: PROCESAMIENTO EXCLUSIVO DE NEGOCIO + SEGURIDAD */
-const headers = $node["Webhook (Business API)"].json.headers;
-const apiKey = 'finacia_secret_key_2026';
+const heads = $input.all()[0].json.headers || {};
+const apiKey = 'financia_secret_key_2026';
 
 // 1. Verificación de Seguridad
-if (headers['x-dashboard-key'] !== apiKey) {
+if (heads['x-dashboard-key'] !== apiKey) {
   throw new Error("No autorizado: API Key inválida o ausente");
 }
 

@@ -10,7 +10,7 @@ class Dashboard {
         this.currentFilter = 'all';
         
         // Security Key (matches n8n)
-        this.apiKey = 'financia_secret_key_2026';
+        this.apiKey = 'finacia_secret_key_2026';
         this.password = 'financia2026'; // Predefined password
 
         this.init();
@@ -62,7 +62,7 @@ class Dashboard {
 
     async fetchData() {
         try {
-            const response = await fetch('https://n8n.10tacle.app/webhook/financia-unified-data', {
+            const response = await fetch('https://n8n.10tacle.app/webhook/finacia-unified-data', {
                 headers: {
                     'X-Dashboard-Key': this.apiKey
                 }

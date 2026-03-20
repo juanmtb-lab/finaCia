@@ -1,6 +1,6 @@
 /* NODES: PROCESAMIENTO EXCLUSIVO DE NEGOCIO + SEGURIDAD */
 const heads = $input.all()[0].json.headers || {};
-const apiKey = 'financia_secret_key_2026';
+const apiKey = 'finacia_secret_key_2026';
 
 // 1. Verificación de Seguridad
 if (heads['x-dashboard-key'] !== apiKey) {

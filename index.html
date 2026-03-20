@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>finaCia | Dashboard Reseller Premium</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <!-- Login Overlay -->
+    <div id="login-overlay" class="login-screen">
+        <div class="login-card glass">
+            <div class="avatar">JM</div>
+            <h2>Acceso Privado</h2>
+            <p>Introduce la contraseña para ver FinaCia</p>
+            <div class="input-group">
+                <input type="password" id="dashboard-pass" placeholder="Contraseña">
+                <button id="login-btn" class="btn-primary">Entrar</button>
+            </div>
+            <p id="login-error" class="error-text hidden">Contraseña incorrecta</p>
+        </div>
+    </div>
+
+    <div id="app" class="hidden">
+        <header class="top-bar glass">
+        <div class="header-left">
+            <h1 class="logo">Fina<span>Cia</span></h1>
+        </div>
+        <div class="header-right">
+            <div class="user-profile">
+                <span class="welcome-text">¡Bienvenido, Scobart!</span>
+                <div class="avatar">SB</div>
+            </div>
+        </div>
+    </header>
+
+    <main class="dashboard-content">
+        <!-- Dashboard Negocio -->
+        <div id="business-view">
+            <section class="metrics-grid" id="business-metrics">
+                <div class="metric-card glass">
+                    <div class="metric-header">
+                        <span class="label">Beneficio Neto</span>
+                        <span class="trend positive" id="profit-trend">+100%</span>
+                    </div>
+                    <div class="metric-value" id="net-profit">€0.00</div>
+                </div>
+                <div class="metric-card glass">
+                    <div class="metric-header">
+                        <span class="label">ROI Inversión</span>
+                    </div>
+                    <div class="metric-value" id="roi-value">0%</div>
+                </div>
+                <div class="metric-card glass">
+                    <div class="metric-header">
+                        <span class="label">Inversión Total</span>
+                    </div>
+                    <div class="metric-value" id="total-spent">€0.00</div>
+                </div>
+            </section>
+
+            <div class="charts-grid">
+                <div class="chart-container glass">
+                    <div class="chart-header">
+                        <h3 class="chart-title" id="chart-title">Evolución del ROI Acumulado</h3>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="profitChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <section class="stats-overview">
+            <div class="stat-card glass" id="stat-card-1">
+                <div class="stat-icon pink-gradient">📈</div>
+                <div class="stat-details">
+                    <p class="stat-label" id="summary-label-1">Ventas</p>
+                    <h3 class="stat-value" id="summary-value-1">€0</h3>
+                </div>
+            </div>
+            <div class="stat-card glass" id="stat-card-2">
+                <div class="stat-icon blue-gradient">📉</div>
+                <div class="stat-details">
+                    <p class="stat-label" id="summary-label-2">Compras</p>
+                    <h3 class="stat-value" id="summary-value-2">€0</h3>
+                </div>
+            </div>
+            <div class="stat-card glass" id="stat-card-3">
+                <div class="stat-icon indigo-gradient">📢</div>
+                <div class="stat-details">
+                    <p class="stat-label" id="summary-label-3">Ads / Publicidad</p>
+                    <h3 class="stat-value" id="summary-value-3">€0</h3>
+                </div>
+            </div>
+        </section>
+
+        <section class="transactions-section glass">
+            <div class="section-header">
+                <h2 class="section-title">Últimos Movimientos de Negocio</h2>
+                <div class="table-filters">
+                    <button class="tab-btn active" data-filter="all">Todas</button>
+                    <button class="tab-btn" data-filter="Venta">Ventas</button>
+                    <button class="tab-btn" data-filter="Compra">Compras</button>
+                </div>
+            </div>
+            <div class="table-wrapper">
+                <table id="transactions-table">
+                    <thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Concepto</th>
+                            <th>Tipo</th>
+                            <th>Monto</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td colspan="4" style="text-align: center;">Cargando datos...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+        <nav class="mobile-nav">
+            <a href="#" class="nav-item active">Dashboard</a>
+            <a href="#" class="nav-item">Stock</a>
+            <a href="#" class="nav-item">Stats</a>
+            <a href="#" class="nav-item">Ajustes</a>
+        </nav>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script type="module" src="/main.js"></script>
+</body>
+</html>

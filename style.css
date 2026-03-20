@@ -36,23 +36,25 @@ body {
     background: var(--bg-dark);
     color: var(--text-main);
     background-image: 
-        radial-gradient(at 0% 0%, rgba(56, 189, 248, 0.1) 0px, transparent 50%),
-        radial-gradient(at 100% 100%, rgba(129, 140, 248, 0.1) 0px, transparent 50%);
+        radial-gradient(at 0% 0%, rgba(56, 189, 248, 0.08) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(129, 140, 248, 0.08) 0px, transparent 50%);
     min-height: 100vh;
     overflow-x: hidden;
 }
 
 .glass {
     background: var(--card-bg);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
     border: 1px solid var(--glass-border);
-    border-radius: 1.5rem;
-    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    border-radius: 2rem; /* More rounded for modern look */
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    transition: var(--transition);
 }
 
 .glass:hover {
-    border: 1px solid rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    transform: translateY(-2px);
 }
 
 /* Header & Logo */
@@ -60,18 +62,18 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 1rem 2.5rem;
-    margin: 1rem;
+    padding: clamp(1rem, 2vw, 1.5rem) clamp(1.5rem, 5vw, 3rem);
+    margin: 1.5rem clamp(1rem, 3vw, 2rem);
     position: sticky;
     top: 1rem;
     z-index: 1000;
 }
 
 .logo {
-    font-size: 1.8rem;
+    font-size: clamp(1.4rem, 4vw, 1.8rem);
     font-weight: 700;
     letter-spacing: -1px;
-    background: linear-gradient(135deg, white 0%, #94a3b8 100%);
+    background: linear-gradient(135deg, white 0%, #cbd5e1 100%);
     background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -86,54 +88,48 @@ body {
 .dashboard-content {
     max-width: 1400px;
     margin: 0 auto;
-    padding: 2rem;
+    padding: clamp(1.5rem, 5vw, 3rem);
     display: flex;
     flex-direction: column;
-    gap: 4rem; /* Aumentado para dar "aire" entre secciones */
-    animation: slideUp 0.6s ease-out;
+    gap: clamp(2rem, 6vw, 4.5rem);
+    animation: slideUp 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 /* Metrics Card Styling */
 .metrics-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 1.5rem;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: clamp(1.5rem, 3vw, 2.5rem);
 }
 
 .metric-card {
-    padding: 1.75rem;
+    padding: clamp(1.5rem, 3vw, 2rem);
     position: relative;
     overflow: hidden;
-}
-
-.metric-card::after {
-    content: '';
-    position: absolute;
-    top: 0; right: 0;
-    width: 100px;
-    height: 100px;
-    background: radial-gradient(circle, rgba(255,255,255,0.05) 0%, transparent 70%);
-    pointer-events: none;
 }
 
 .metric-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 1rem;
+    margin-bottom: 1.5rem;
 }
 
 .metric-header .label {
     color: var(--text-muted);
-    font-size: 1rem;
+    font-size: clamp(0.9rem, 1.5vw, 1rem);
     font-weight: 500;
     letter-spacing: 0.5px;
 }
 
 .metric-value {
-    font-size: 2.75rem;
+    font-size: clamp(2rem, 5vw, 2.75rem);
     font-weight: 700;
-    letter-spacing: -1px;
+    letter-spacing: -1.5px;
+    background: linear-gradient(to bottom, white, #cbd5e1);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
 }
 
 /* Trends */
@@ -158,13 +154,14 @@ body {
 }
 
 .chart-container {
-    padding: 2rem;
+    padding: clamp(1.5rem, 4vw, 2.5rem);
 }
 
 .chart-title {
-    font-size: 1.25rem;
+    font-size: clamp(1.1rem, 2vw, 1.35rem);
     font-weight: 600;
-    margin-bottom: 2rem;
+    margin-bottom: 2.5rem;
+    color: var(--text-main);
 }
 
 .chart-wrapper {
@@ -175,8 +172,8 @@ body {
 /* Stats Overview */
 .stats-overview {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 1.5rem;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: clamp(1.25rem, 2.5vw, 2rem);
 }
 
 .stat-card {
@@ -218,34 +215,44 @@ body {
 
 .table-filters {
     display: flex;
-    gap: 0.75rem;
-    background: rgba(255, 255, 255, 0.03);
-    padding: 0.5rem;
-    border-radius: 1rem;
+    flex-wrap: wrap; /* Para móviles */
+    gap: 0.5rem;
+    background: rgba(255, 255, 255, 0.02);
+    padding: 0.4rem;
+    border-radius: 1.25rem;
+    width: fit-content;
 }
 
 .tab-btn {
     background: transparent;
     border: none;
     color: var(--text-muted);
-    padding: 0.6rem 1.25rem;
-    border-radius: 0.75rem;
+    padding: 0.5rem 1rem;
+    border-radius: 0.85rem;
     cursor: pointer;
     font-weight: 500;
+    font-size: 0.9rem;
     transition: var(--transition);
 }
 
-.tab-btn:hover { color: white; background: rgba(255,255,255,0.05); }
+.tab-btn:hover { color: white; background: rgba(255,255,255,0.04); }
 .tab-btn.active {
     background: var(--primary);
     color: white;
-    box-shadow: 0 4px 15px var(--primary-glow);
+    box-shadow: 0 4px 20px var(--primary-glow);
 }
 
 .table-wrapper {
-    margin-top: 1.5rem;
+    margin-top: 2rem;
     overflow-x: auto;
+    padding-bottom: 1rem;
+    /* Custom scrollbar for premium look */
+    scrollbar-width: thin;
+    scrollbar-color: var(--glass-border) transparent;
 }
+
+.table-wrapper::-webkit-scrollbar { height: 6px; }
+.table-wrapper::-webkit-scrollbar-thumb { background: var(--glass-border); border-radius: 10px; }
 
 table {
     width: 100%;
@@ -296,9 +303,9 @@ td:last-child { border-radius: 0 1rem 1rem 0; }
 }
 
 .login-card {
-    max-width: 400px;
+    max-width: 440px;
     width: 100%;
-    padding: 3rem 2rem;
+    padding: clamp(2rem, 5vw, 4rem) clamp(1.5rem, 4vw, 3rem);
     text-align: center;
     display: flex;
     flex-direction: column;
@@ -364,8 +371,18 @@ td:last-child { border-radius: 0 1rem 1rem 0; }
 
 /* Navigation for mobile (optional context) */
 .mobile-nav { display: none; }
+/* Mobile Fixes */
 @media (max-width: 768px) {
-    .top-bar { padding: 1rem 1.5rem; }
-    .dashboard-content { padding: 1.5rem; }
+    .top-bar { 
+        padding: 1rem 1.25rem; 
+        margin: 1rem;
+    }
+    .user-profile .welcome-text { display: none; } /* Hide name on mobile to save space */
     .metric-value { font-size: 2.25rem; }
+}
+
+@media (max-width: 480px) {
+    .metrics-grid { grid-template-columns: 1fr; }
+    .stat-card { padding: 1rem; }
+    .login-card { padding: 2.5rem 1.5rem; }
 }

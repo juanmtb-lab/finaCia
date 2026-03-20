@@ -93,33 +93,34 @@ class Dashboard {
 
     calculateMetrics() {
         const t = this.data.transactions;
-        // Ordenar por fecha cronológica (assumiendo formato DD/MM/YYYY o similar)
-        const sortedTransactions = [...t].sort((a,b) => {
-            const dateA = new Date(a.date.split('/').reverse().join('-'));
-            const dateB = new Date(b.date.split('/').reverse().join('-'));
-            return dateA - dateB;
-        });
+        if (!t || t.length === 0) return;
 
-        let cumulativeSales = 0;
-        let cumulativeSpent = 0;
-        const roiHistory = [];
+        // Group by Month
+        const monthlyMap = {};
+        const monthNames = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
+
+        const sortedTransactions = [...t].sort((a,b) => {
+            const [dA, mA, yA] = a.date.split('/');
+            const [dB, mB, yB] = b.date.split('/');
+            return new Date(yA, mA-1, dA) - new Date(yB, mB-1, dB);
+        });
 
         sortedTransactions.forEach(x => {
-            if (x.type === 'Venta') {
-                cumulativeSales += x.amount;
-            } else {
-                cumulativeSpent += Math.abs(x.amount);
+            const [d, m, y] = x.date.split('/');
+            const key = `${y}-${m.padStart(2, '0')}`;
+            if (!monthlyMap[key]) {
+                const monthName = monthNames[parseInt(m)-1];
+                monthlyMap[key] = { label: `${monthName} ${y.slice(-2)}`, value: 0 };
             }
-
-            // ROI = (Beneficio Neto / Inversión) * 100
-            const netProfit = cumulativeSales - cumulativeSpent;
-            const currentROI = cumulativeSpent > 0 ? (netProfit / cumulativeSpent) * 100 : 0;
             
-            roiHistory.push({
-                label: x.date || '-',
-                value: currentROI
-            });
+            if (x.type === 'Venta') {
+                monthlyMap[key].value += x.amount;
+            } else {
+                monthlyMap[key].value -= Math.abs(x.amount);
+            }
         });
+
+        const history = Object.keys(monthlyMap).sort().map(k => monthlyMap[k]);
 
         const totalSales = t.filter(x => x.type === 'Venta').reduce((acc, curr) => acc + curr.amount, 0);
         const totalPurchases = t.filter(x => x.type === 'Compra').reduce((acc, curr) => acc + curr.amount, 0);
@@ -137,7 +138,7 @@ class Dashboard {
             roi: finalROI
         };
 
-        this.data.history = roiHistory;
+        this.data.history = history;
     }
 
     renderAll() {
@@ -164,26 +165,22 @@ class Dashboard {
         const labels = this.data.history.map(h => h.label);
         const values = this.data.history.map(h => h.value);
 
-        // Advanced Gradient for Chart
         const gradient = ctx.createLinearGradient(0, 0, 0, 400);
         gradient.addColorStop(0, 'rgba(56, 189, 248, 0.4)');
         gradient.addColorStop(1, 'rgba(56, 189, 248, 0)');
 
         this.profitChart = new Chart(ctx, {
-            type: 'line',
+            type: 'bar',
             data: {
                 labels: labels,
                 datasets: [{
-                    label: 'ROI Acumulado (%)',
+                    label: 'Beneficio Mensual',
                     data: values,
-                    borderColor: '#38bdf8',
-                    borderWidth: 3,
-                    pointBackgroundColor: '#38bdf8',
-                    pointBorderColor: 'rgba(255,255,255,0.5)',
-                    pointHoverRadius: 6,
-                    backgroundColor: gradient,
-                    fill: true,
-                    tension: 0.45
+                    backgroundColor: values.map(v => v >= 0 ? 'rgba(16, 185, 129, 0.6)' : 'rgba(244, 63, 94, 0.6)'),
+                    borderColor: values.map(v => v >= 0 ? '#10b981' : '#f43f5e'),
+                    borderWidth: 2,
+                    borderRadius: 8,
+                    hoverBackgroundColor: values.map(v => v >= 0 ? 'rgba(16, 185, 129, 0.8)' : 'rgba(244, 63, 94, 0.8)'),
                 }]
             },
             options: {
@@ -192,28 +189,27 @@ class Dashboard {
                 plugins: {
                     legend: { display: false },
                     tooltip: {
-                        backgroundColor: 'rgba(15, 23, 42, 0.9)',
-                        titleFont: { family: 'Outfit', size: 14 },
+                        backgroundColor: 'rgba(15, 23, 42, 0.95)',
+                        titleFont: { family: 'Outfit', size: 14, weight: 'bold' },
                         bodyFont: { family: 'Outfit', size: 13 },
                         padding: 12,
-                        cornerRadius: 10,
+                        cornerRadius: 12,
                         displayColors: false,
                         callbacks: {
                             label: function(context) {
-                                return `ROI: ${context.parsed.y.toFixed(1)}%`;
+                                return `Beneficio: €${context.parsed.y.toLocaleString('es-ES', { minimumFractionDigits: 2 })}`;
                             }
                         }
                     }
                 },
                 scales: {
                     y: { 
-                        beginAtZero: true, 
-                        grid: { color: 'rgba(255,255,255,0.03)' },
+                        grid: { color: 'rgba(255,255,255,0.05)', drawBorder: false },
                         ticks: { 
                             color: '#94a3b8', 
                             font: { family: 'Outfit' },
                             callback: function(value) {
-                                return value + '%';
+                                return '€' + value.toLocaleString('es-ES');
                             }
                         }
                     },

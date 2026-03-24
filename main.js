@@ -1,17 +1,18 @@
 class Dashboard {
     constructor() {
         this.data = {
-            transactions: [],
-            metrics: {},
-            history: []
+            business: { transactions: [], metrics: {}, history: [] }
         };
-        this.profitChart = null;
+        this.charts = {
+            profit: null,
+            distribution: null
+        };
         this.isLoading = true;
         this.currentFilter = 'all';
         
         // Security Key (matches n8n)
         this.apiKey = 'finacia_secret_key_2026';
-        this.password = 'financia2026'; // Predefined password
+        this.password = 'financia2026';
 
         this.init();
     }
@@ -49,265 +50,217 @@ class Dashboard {
         loginBtn?.addEventListener('click', handleLogin);
         passInput?.addEventListener('keypress', (e) => { if(e.key === 'Enter') handleLogin(); });
 
-        // Filtros de tabla
+        // Filtros de tabla Negocio
         document.querySelectorAll('.tab-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
                 e.target.classList.add('active');
                 this.currentFilter = e.target.dataset.filter;
-                this.renderTable();
+                this.renderBusinessTable();
             });
         });
     }
 
+
+
     async fetchData() {
         try {
-            const response = await fetch('https://n8n.10tacle.app/webhook/finacia-unified-data', {
-                headers: {
-                    'X-Dashboard-Key': this.apiKey
-                }
+            const resp = await fetch('https://n8n.10tacle.app/webhook/finacia-unified-data', {
+                headers: { 'X-Dashboard-Key': this.apiKey }
             });
-            if (!response.ok) throw new Error("Acceso denegado o error de servidor");
+            const result = await resp.json();
             
-            const result = await response.json();
-            
-            // Expected payload: { business: { transactions: [...] } }
             if (result && result.business) {
-                this.data.transactions = result.business.transactions || [];
-                this.calculateMetrics();
-                this.isLoading = false;
-                this.renderAll();
-            } else {
-                throw new Error("Formato de datos no válido desde n8n");
+                this.data.business.transactions = result.business.transactions || [];
+                this.calculateBusinessMetrics();
             }
+            
+            this.isLoading = false;
+            this.renderAll();
         } catch (error) {
             console.error("Error fetching data:", error);
-            const tbody = document.querySelector('#transactions-table tbody');
-            if (tbody) {
-                tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--rose);">
-                    Error de conexión: ${error.message}. Por favor revisa n8n.
-                </td></tr>`;
-            }
         }
     }
 
-    calculateMetrics() {
-        const t = this.data.transactions;
+
+
+    calculateBusinessMetrics() {
+        const t = this.data.business.transactions;
         if (!t || t.length === 0) return;
 
-        // Group by Month
         const monthlyMap = {};
         const monthNames = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
 
-        const sortedTransactions = [...t].sort((a,b) => {
+        // Sorting by date
+        const sorted = [...t].sort((a,b) => {
             const [dA, mA, yA] = a.date.split('/');
             const [dB, mB, yB] = b.date.split('/');
             return new Date(yA, mA-1, dA) - new Date(yB, mB-1, dB);
         });
 
-        sortedTransactions.forEach(x => {
+        // Per-item cost map for profit calculation
+        this.data.business.costMap = {};
+        t.filter(x => x.type === 'Compra').forEach(c => {
+            this.data.business.costMap[c.item.toLowerCase()] = c.amount;
+        });
+
+        sorted.forEach(x => {
             const [d, m, y] = x.date.split('/');
             const key = `${y}-${m.padStart(2, '0')}`;
             if (!monthlyMap[key]) {
                 const monthName = monthNames[parseInt(m)-1];
                 monthlyMap[key] = { label: `${monthName} ${y.slice(-2)}`, value: 0 };
             }
-            
-            if (x.type === 'Venta') {
+
+            const type = x.type;
+            if (type === 'Venta') {
                 monthlyMap[key].value += x.amount;
-            } else {
+            } else if (type === 'Compra' || type === 'Publicidad' || type === 'Envío') {
+                monthlyMap[key].value -= Math.abs(x.amount);
+            } else if (type === 'Devolución a favor') {
+                monthlyMap[key].value += Math.abs(x.amount);
+            } else if (type === 'Devolución en contra') {
                 monthlyMap[key].value -= Math.abs(x.amount);
             }
         });
 
-        const history = Object.keys(monthlyMap).sort().map(k => monthlyMap[k]);
-
         const totalSales = t.filter(x => x.type === 'Venta').reduce((acc, curr) => acc + curr.amount, 0);
         const totalPurchases = t.filter(x => x.type === 'Compra').reduce((acc, curr) => acc + curr.amount, 0);
         const totalAds = t.filter(x => x.type === 'Publicidad').reduce((acc, curr) => acc + curr.amount, 0);
-        const totalSpent = totalPurchases + totalAds;
-        const totalNetProfit = totalSales - totalSpent;
-        const finalROI = totalSpent > 0 ? (totalNetProfit / totalSpent) * 100 : 0;
+        const totalShipping = t.filter(x => x.type === 'Envío').reduce((acc, curr) => acc + curr.amount, 0);
+        const totalReturnsPos = t.filter(x => x.type === 'Devolución a favor').reduce((acc, curr) => acc + curr.amount, 0);
+        const totalReturnsNeg = t.filter(x => x.type === 'Devolución en contra').reduce((acc, curr) => acc + curr.amount, 0);
 
-        this.data.metrics = {
-            sales: totalSales,
-            purchases: totalPurchases,
-            ads: totalAds,
-            totalSpent: totalSpent,
-            netProfit: totalNetProfit,
-            roi: finalROI
+        const totalSpent = totalPurchases + totalAds + totalShipping + totalReturnsNeg;
+        const totalNetProfit = (totalSales + totalReturnsPos) - totalSpent;
+
+        this.data.business.metrics = {
+            sales: totalSales, purchases: totalPurchases, ads: totalAds,
+            totalSpent: totalSpent, netProfit: totalNetProfit,
+            roi: totalSpent > 0 ? (totalNetProfit / totalSpent) * 100 : 0
         };
-
-        this.data.history = history;
+        this.data.business.history = Object.keys(monthlyMap).sort().map(k => monthlyMap[k]);
     }
 
     renderAll() {
-        this.renderMetrics();
-        this.renderChart();
-        this.renderDistributionChart();
-        this.renderTable();
+        this.renderBusinessMetrics();
+        this.renderBusinessCharts();
+        this.renderBusinessTable();
     }
 
-    renderDistributionChart() {
-        const ctx = document.getElementById('distributionChart').getContext('2d');
-        if (this.distChart) this.distChart.destroy();
-
-        const sales = this.data.metrics.sales;
-        const investment = this.data.metrics.purchases + this.data.metrics.ads;
-
-        this.distChart = new Chart(ctx, {
-            type: 'doughnut',
-            data: {
-                labels: ['Ventas', 'Inversión (Compras + Ads)'],
-                datasets: [{
-                    data: [sales, investment],
-                    backgroundColor: ['rgba(56, 189, 248, 0.7)', 'rgba(244, 63, 94, 0.7)'],
-                    borderColor: ['#38bdf8', '#f43f5e'],
-                    borderWidth: 2,
-                    hoverOffset: 15
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'bottom',
-                        labels: {
-                            color: '#94a3b8',
-                            font: { family: 'Outfit', size: 12 },
-                            padding: 20
-                        }
-                    },
-                    tooltip: {
-                        backgroundColor: 'rgba(15, 23, 42, 0.95)',
-                        padding: 12,
-                        cornerRadius: 12,
-                        callbacks: {
-                            label: function(context) {
-                                let label = context.label || '';
-                                if (label) label += ': ';
-                                if (context.parsed !== null) {
-                                    label += '€' + context.parsed.toLocaleString('es-ES');
-                                }
-                                return label;
-                            }
-                        }
-                    }
-                },
-                cutout: '70%'
-            }
-        });
-    }
-
-    renderMetrics() {
-        const m = this.data.metrics;
+    renderBusinessMetrics() {
+        const m = this.data.business.metrics;
+        if (!m || !m.sales) return;
         document.getElementById('net-profit').innerText = `€${m.netProfit.toLocaleString('es-ES', { minimumFractionDigits: 2 })}`;
         document.getElementById('roi-value').innerText = `${m.roi.toFixed(1)}%`;
         document.getElementById('total-spent').innerText = `€${m.totalSpent.toLocaleString('es-ES', { minimumFractionDigits: 2 })}`;
-
         document.getElementById('summary-value-1').innerText = `€${m.sales.toLocaleString('es-ES', { minimumFractionDigits: 2 })}`;
         document.getElementById('summary-value-2').innerText = `€${m.purchases.toLocaleString('es-ES', { minimumFractionDigits: 2 })}`;
         document.getElementById('summary-value-3').innerText = `€${m.ads.toLocaleString('es-ES', { minimumFractionDigits: 2 })}`;
     }
 
-    renderChart() {
-        const ctx = document.getElementById('profitChart').getContext('2d');
-        if (this.profitChart) this.profitChart.destroy();
 
-        const labels = this.data.history.map(h => h.label);
-        const values = this.data.history.map(h => h.value);
 
-        const gradient = ctx.createLinearGradient(0, 0, 0, 400);
-        gradient.addColorStop(0, 'rgba(56, 189, 248, 0.4)');
-        gradient.addColorStop(1, 'rgba(56, 189, 248, 0)');
-
-        this.profitChart = new Chart(ctx, {
-            type: 'bar',
+    renderBusinessCharts() {
+        // Profit Line Chart (Smoothing requested)
+        const ctxProfit = document.getElementById('profitChart').getContext('2d');
+        if (this.charts.profit) this.charts.profit.destroy();
+        this.charts.profit = new Chart(ctxProfit, {
+            type: 'line',
             data: {
-                labels: labels,
+                labels: this.data.business.history.map(h => h.label),
                 datasets: [{
-                    label: 'Beneficio Mensual',
-                    data: values,
-                    backgroundColor: values.map(v => v >= 0 ? 'rgba(16, 185, 129, 0.6)' : 'rgba(244, 63, 94, 0.6)'),
-                    borderColor: values.map(v => v >= 0 ? '#10b981' : '#f43f5e'),
-                    borderWidth: 2,
-                    borderRadius: 8,
-                    hoverBackgroundColor: values.map(v => v >= 0 ? 'rgba(16, 185, 129, 0.8)' : 'rgba(244, 63, 94, 0.8)'),
+                    label: 'Beneficio',
+                    data: this.data.business.history.map(h => h.value),
+                    borderColor: '#10b981',
+                    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 4,
+                    pointBackgroundColor: '#10b981'
                 }]
             },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: false },
-                    tooltip: {
-                        backgroundColor: 'rgba(15, 23, 42, 0.95)',
-                        titleFont: { family: 'Outfit', size: 14, weight: 'bold' },
-                        bodyFont: { family: 'Outfit', size: 13 },
-                        padding: 12,
-                        cornerRadius: 12,
-                        displayColors: false,
-                        callbacks: {
-                            label: function(context) {
-                                return `Beneficio: €${context.parsed.y.toLocaleString('es-ES', { minimumFractionDigits: 2 })}`;
-                            }
-                        }
-                    }
-                },
+            options: { 
+                responsive: true, 
+                maintainAspectRatio: false, 
+                plugins: { legend: { display: false } },
                 scales: {
-                    y: { 
-                        grid: { color: 'rgba(255,255,255,0.05)', drawBorder: false },
-                        ticks: { 
-                            color: '#94a3b8', 
-                            font: { family: 'Outfit' },
-                            callback: function(value) {
-                                return '€' + value.toLocaleString('es-ES');
-                            }
-                        }
-                    },
-                    x: { 
-                        grid: { display: false },
-                        ticks: { color: '#94a3b8', font: { family: 'Outfit' } }
-                    }
+                    y: { grid: { color: 'rgba(255,255,255,0.05)' } },
+                    x: { grid: { display: false } }
                 }
             }
         });
+
+        // Distribution Doughnut
+        const ctxDist = document.getElementById('distributionChart').getContext('2d');
+        if (this.charts.distribution) this.charts.distribution.destroy();
+        this.charts.distribution = new Chart(ctxDist, {
+            type: 'doughnut',
+            data: {
+                labels: ['Ventas', 'Gastos/Inversión'],
+                datasets: [{
+                    data: [this.data.business.metrics.sales, this.data.business.metrics.totalSpent],
+                    backgroundColor: ['rgba(56, 189, 248, 0.7)', 'rgba(244, 63, 94, 0.7)'],
+                    borderWidth: 0
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, cutout: '70%', plugins: { legend: { position: 'bottom' } } }
+        });
     }
 
-    renderTable() {
+
+
+    renderBusinessTable() {
         const tbody = document.querySelector('#transactions-table tbody');
         if (!tbody) return;
-
-        const filtered = this.currentFilter === 'all' 
-            ? this.data.transactions 
-            : this.data.transactions.filter(t => t.type === this.currentFilter);
-
-        if (filtered.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="4" style="text-align: center;">No hay transacciones registradas.</td></tr>`;
-            return;
-        }
-
+        const filtered = this.currentFilter === 'all' ? this.data.business.transactions : (
+            this.currentFilter === 'Devolución' ? this.data.business.transactions.filter(t => t.type.includes('Devolución')) : 
+            this.data.business.transactions.filter(t => t.type === this.currentFilter)
+        );
+        
         tbody.innerHTML = filtered.map(t => {
-            const isNegative = t.type === 'Compra' || t.type === 'Publicidad';
+            let profitVal = 0;
+            if (t.type === 'Venta') {
+                const cost = this.data.business.costMap[t.item.toLowerCase()] || 0;
+                profitVal = t.amount - cost;
+            } else if (t.type === 'Devolución a favor') {
+                profitVal = t.amount;
+            } else {
+                // Compra, Publicidad, Envío, Devolución en contra are costs
+                profitVal = -Math.abs(t.amount);
+            }
+            
+            const profitStr = (profitVal >= 0 ? '+' : '-') + Math.abs(profitVal).toLocaleString('es-ES', { minimumFractionDigits: 2 }) + '€';
+            const profitColor = profitVal >= 0 ? 'var(--emerald)' : 'var(--rose)';
+            
             return `
                 <tr>
-                    <td>${t.date || '-'}</td>
-                    <td>${t.item || '-'}</td>
+                    <td>${t.date}</td>
+                    <td>${t.item}</td>
                     <td><span class="type-tag ${this.getTypeClass(t.type)}">${t.type}</span></td>
-                    <td style="color: ${isNegative ? 'var(--rose)' : 'var(--emerald)'}">
-                        ${isNegative ? '-' : '+'}${Math.abs(t.amount).toLocaleString('es-ES', { minimumFractionDigits: 2 })}€
+                    <td style="color: ${this.isNegative(t.type)?'var(--rose)':'var(--emerald)'}">
+                        ${this.isNegative(t.type)?'-':'+'}${Math.abs(t.amount).toLocaleString('es-ES', { minimumFractionDigits: 2 })}€
                     </td>
+                    <td style="font-weight: 600; color: ${profitColor}">${profitStr}</td>
                 </tr>
             `;
-        }).join('');
+        }).join('') || '<tr><td colspan="5" style="text-align: center;">Sin transacciones</td></tr>';
     }
+
+    isNegative(type) {
+        return ['Compra', 'Publicidad', 'Envío', 'Devolución en contra'].includes(type);
+    }
+
+
 
     getTypeClass(type) {
         switch(type) {
             case 'Venta': return 'emerald-tag';
             case 'Compra': return 'rose-tag';
             case 'Publicidad': return 'indigo-tag';
+            case 'Envío': return 'shipping-tag';
+            case 'Devolución a favor': return 'dev-favor-tag';
+            case 'Devolución en contra': return 'dev-contra-tag';
             default: return '';
         }
     }

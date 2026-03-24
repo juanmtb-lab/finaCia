@@ -298,6 +298,66 @@ td:last-child { border-radius: 0 1rem 1rem 0; }
 .emerald-tag { background: rgba(16, 185, 129, 0.1); color: #10b981; }
 .rose-tag { background: rgba(244, 63, 94, 0.1); color: #f43f5e; }
 .indigo-tag { background: rgba(129, 140, 248, 0.1); color: #818cf8; }
+.shipping-tag { background: rgba(245, 158, 11, 0.1); color: #f59e0b; }
+.dev-favor-tag { background: rgba(56, 189, 248, 0.1); color: #38bdf8; }
+.dev-contra-tag { background: rgba(244, 63, 94, 0.15); color: #fb7185; }
+
+/* View Switcher */
+.view-switcher {
+    display: flex;
+    gap: 0.5rem;
+    padding: 0.4rem;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 1.25rem;
+    margin-left: 1.5rem;
+}
+
+.view-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    padding: 0.5rem 1.25rem;
+    border-radius: 0.85rem;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.85rem;
+    transition: var(--transition);
+}
+
+.view-btn.active {
+    background: var(--primary);
+    color: white;
+    box-shadow: 0 4px 15px var(--primary-glow);
+}
+
+/* Tables Grid for Personal View */
+.tables-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: clamp(1.5rem, 3vw, 2.5rem);
+}
+
+.badge {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-muted);
+    border: 1px solid var(--glass-border);
+}
+
+.badge.positive {
+    background: rgba(16, 185, 129, 0.1);
+    color: var(--emerald);
+    border-color: var(--emerald-glow);
+}
+
+/* Header Left Adjustments */
+.header-left {
+    display: flex;
+    align-items: center;
+}
 
 /* Login Screen */
 .login-screen {

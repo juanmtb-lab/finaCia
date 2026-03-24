@@ -80,31 +80,30 @@
                     </div>
                 </div>
             </div>
-        </div>
 
-        <section class="stats-overview">
-            <div class="stat-card glass" id="stat-card-1">
-                <div class="stat-icon pink-gradient">📈</div>
-                <div class="stat-details">
-                    <p class="stat-label" id="summary-label-1">Ventas</p>
-                    <h3 class="stat-value" id="summary-value-1">€0</h3>
+            <section class="stats-overview">
+                <div class="stat-card glass" id="stat-card-1">
+                    <div class="stat-icon pink-gradient">📈</div>
+                    <div class="stat-details">
+                        <p class="stat-label" id="summary-label-1">Ventas</p>
+                        <h3 class="stat-value" id="summary-value-1">€0</h3>
+                    </div>
                 </div>
-            </div>
-            <div class="stat-card glass" id="stat-card-2">
-                <div class="stat-icon blue-gradient">📉</div>
-                <div class="stat-details">
-                    <p class="stat-label" id="summary-label-2">Compras</p>
-                    <h3 class="stat-value" id="summary-value-2">€0</h3>
+                <div class="stat-card glass" id="stat-card-2">
+                    <div class="stat-icon blue-gradient">📉</div>
+                    <div class="stat-details">
+                        <p class="stat-label" id="summary-label-2">Compras</p>
+                        <h3 class="stat-value" id="summary-value-2">€0</h3>
+                    </div>
                 </div>
-            </div>
-            <div class="stat-card glass" id="stat-card-3">
-                <div class="stat-icon indigo-gradient">📢</div>
-                <div class="stat-details">
-                    <p class="stat-label" id="summary-label-3">Ads / Publicidad</p>
-                    <h3 class="stat-value" id="summary-value-3">€0</h3>
+                <div class="stat-card glass" id="stat-card-3">
+                    <div class="stat-icon indigo-gradient">📢</div>
+                    <div class="stat-details">
+                        <p class="stat-label" id="summary-label-3">Ads / Publicidad</p>
+                        <h3 class="stat-value" id="summary-value-3">€0</h3>
+                    </div>
                 </div>
-            </div>
-        </section>
+            </section>
 
             <div class="transactions-section glass">
                 <div class="table-header">
@@ -114,32 +113,36 @@
                         <button class="tab-btn" data-filter="Venta">Ventas</button>
                         <button class="tab-btn" data-filter="Compra">Compras</button>
                         <button class="tab-btn" data-filter="Publicidad">Publicidad</button>
+                        <button class="tab-btn" data-filter="Envío">Envíos</button>
+                        <button class="tab-btn" data-filter="Devolución">Devoluciones</button>
                     </div>
                 </div>
                 <div class="table-wrapper">
-                <table id="transactions-table">
-                    <thead>
-                        <tr>
-                            <th>Fecha</th>
-                            <th>Concepto</th>
-                            <th>Tipo</th>
-                            <th>Monto</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr><td colspan="4" style="text-align: center;">Cargando datos...</td></tr>
-                    </tbody>
-                </table>
+                    <table id="transactions-table">
+                        <thead>
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Concepto</th>
+                                <th>Tipo</th>
+                                <th>Monto</th>
+                                <th>Profit</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td colspan="4" style="text-align: center;">Cargando datos...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
+        </div>
+
         </div>
     </main>
 
-        <nav class="mobile-nav">
-            <a href="#" class="nav-item active">Dashboard</a>
-            <a href="#" class="nav-item">Stock</a>
-            <a href="#" class="nav-item">Stats</a>
-            <a href="#" class="nav-item">Ajustes</a>
-        </nav>
+    <nav class="mobile-nav">
+        <a href="#" class="nav-item active">Dashboard</a>
+        <a href="#" class="nav-item">Ajustes</a>
+    </nav>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 

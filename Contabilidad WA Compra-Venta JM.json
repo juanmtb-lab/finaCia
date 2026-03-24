@@ -1,0 +1,687 @@
+{
+  "name": "Contabilidad WA Compra-Venta JM",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "messages"
+        ],
+        "options": {
+          "messageStatusUpdates": []
+        }
+      },
+      "type": "n8n-nodes-base.whatsAppTrigger",
+      "typeVersion": 1,
+      "position": [
+        -432,
+        -304
+      ],
+      "id": "115dd8e9-336d-4900-9432-d4fc03ad8fb1",
+      "name": "WhatsApp Trigger",
+      "webhookId": "36e21ce0-e176-4b1a-9d2f-cfb3848a8fee",
+      "credentials": {
+        "whatsAppTriggerApi": {
+          "id": "oB1Wl3lb1VimNi2z",
+          "name": "WhatsApp OAuth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        96,
+        -80
+      ],
+      "id": "c95e63f1-a0bb-4590-b3a8-d1a2254213cf",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "wROo03aQnonEszMR",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Actúa como un Sistema de Extracción de Datos Contables de alta precisión. Tu única función es transformar mensajes de texto en objetos JSON estructurados. No eres un asistente de chat, eres un procesador de datos.\n\n### REGLAS DE ORO (ESTRICTAS):\n1. NO INVENTES DATOS. Si falta el monto, devuelve el JSON de error.\n2. NO AÑADAS PROSA. No saludes ni expliques nada. Solo devuelve el JSON puro.\n3. SIN MARCADO MARKDOWN. Prohibido usar bloques de código (```json). Envía solo el texto del objeto.\n4. DECIMALES: Usa siempre el punto (.) para decimales, nunca la coma.\n5. PLATAFORMA POR DEFECTO: Si el mensaje no menciona plataforma, asume \"Vinted\".\n\n### LÓGICA DE CLASIFICACIÓN (CASE INSENSITIVE):\n- \"Venta de...\" -> Tipo: \"Venta\"\n- \"Compra de...\" -> Tipo: \"Compra\"\n- \"Inversión Publicidad...\" -> Tipo: \"Publicidad\"\n- \"Realizo devolución de...\" -> Tipo: \"Devolución_Favor\" (Dinero que recupero)\n- \"Me realizan devolución de...\" -> Tipo: \"Devolución_Contra\" (Dinero que devuelvo)\n- \"Gasto de envío de...\" -> Tipo: \"Envío\"\n\n### EJEMPLOS DE PROCESAMIENTO:\n- Entrada: \"Realizo devolución de Zapatillas por 45€ en Wallapop\"\n  Salida: {\"Tipo\": \"Devolución_Favor\", \"Concepto\": \"Zapatillas\", \"Monto\": 45.00, \"Plataforma\": \"Wallapop\"}\n\n- Entrada: \"Me realizan devolución de Bolso por 20 en Vinted\"\n  Salida: {\"Tipo\": \"Devolución_Contra\", \"Concepto\": \"Bolso\", \"Monto\": 20.00, \"Plataforma\": \"Vinted\"}\n\n- Entrada: \"Gasto de envío de 6.50 en Correos\"\n  Salida: {\"Tipo\": \"Envío\", \"Concepto\": \"Gasto de envío\", \"Monto\": 6.50, \"Plataforma\": \"Correos\"}\n\n### VALIDACIÓN DE ERRORES:\nSi el mensaje no tiene sentido contable o falta el precio, devuelve: {\"error\": \"Mensaje no contable\"}\n\n### MENSAJE A PROCESAR:\n{{ $json.messages[0].text.body }}",
+        "hasOutputParser": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        0,
+        -304
+      ],
+      "id": "2ea5c510-fb4b-4b5d-bb5b-fc5a0e5c85cc",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1EacTdJFv6V010pzdGFh1he3uKJXkzC0yj7bW3_SLBLc",
+          "mode": "list",
+          "cachedResultName": "Contabilidad Compra-Venta",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1EacTdJFv6V010pzdGFh1he3uKJXkzC0yj7bW3_SLBLc/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Hoja 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1EacTdJFv6V010pzdGFh1he3uKJXkzC0yj7bW3_SLBLc/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "fecha",
+              "displayName": "fecha",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "tipo",
+              "displayName": "tipo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "concepto",
+              "displayName": "concepto",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "monto",
+              "displayName": "monto",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "plataforma",
+              "displayName": "plataforma",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Fecha",
+              "displayName": "Fecha",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Tipo",
+              "displayName": "Tipo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Concepto",
+              "displayName": "Concepto",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Monto",
+              "displayName": "Monto",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Plataforma",
+              "displayName": "Plataforma",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        592,
+        -304
+      ],
+      "id": "5ccb5cf6-6a79-4626-87fd-162730fc36d2",
+      "name": "Compra-Venta",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "lU4uBUA7OP02Txfm",
+          "name": "Google Sheets JM"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1EacTdJFv6V010pzdGFh1he3uKJXkzC0yj7bW3_SLBLc",
+          "mode": "list",
+          "cachedResultName": "Contabilidad Compra-Venta",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1EacTdJFv6V010pzdGFh1he3uKJXkzC0yj7bW3_SLBLc/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1548346629,
+          "mode": "list",
+          "cachedResultName": "BALANCE DE RESULTADOS",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1EacTdJFv6V010pzdGFh1he3uKJXkzC0yj7bW3_SLBLc/edit#gid=1548346629"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "row_number": 2,
+            "ID": "={{ $json.ID }}",
+            "Mes": "={{ $json.Mes }}",
+            "Plataforma": "={{ $json.Plataforma }}",
+            "Total_Ventas": "={{ $json.Total_Ventas }}",
+            "Total_Gastos": "={{ $json.Total_Gastos }}",
+            "Beneficio_Neto": "={{ $json.Beneficio_Neto }}"
+          },
+          "matchingColumns": [
+            "ID"
+          ],
+          "schema": [
+            {
+              "id": "ID",
+              "displayName": "ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Mes",
+              "displayName": "Mes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Plataforma",
+              "displayName": "Plataforma",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Total_Ventas",
+              "displayName": "Total_Ventas",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Total_Gastos",
+              "displayName": "Total_Gastos",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Beneficio_Neto",
+              "displayName": "Beneficio_Neto",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1248,
+        -240
+      ],
+      "id": "f57328d2-4c49-4cfb-8461-4e479d4993c1",
+      "name": "Balance de resultados",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "lU4uBUA7OP02Txfm",
+          "name": "Google Sheets JM"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const filas = $input.all();\nconst sumatorio = {};\n\nfilas.forEach(f => {\n  const d = f.json;\n  if (!d.Fecha || !d.Monto || d.Tipo === \"Desconocido\") return;\n\n  let mesAnio = \"\";\n  \n  // PARSEADOR BLINDADO DE FECHAS\n  const fechaStr = String(d.Fecha);\n  if (fechaStr.includes('-')) {\n    // Caso: 2026-03-21\n    const partes = fechaStr.split('-');\n    mesAnio = `${partes[1]}/${partes[0]}`; \n  } else if (fechaStr.includes('/')) {\n    // Caso: 21/03/2026\n    const partes = fechaStr.split('/');\n    // Detectamos si el año está al final (3 piezas)\n    mesAnio = partes[2] && partes[2].length === 4 ? `${partes[1]}/${partes[2]}` : `${partes[1]}/${partes[0]}`;\n  }\n\n  const plat = d.Plataforma || \"Vinted\";\n  const idUnico = `${mesAnio}-${plat}`;\n\n  if (!sumatorio[idUnico]) {\n    sumatorio[idUnico] = { ID: idUnico, Mes: mesAnio, Plataforma: plat, Total_Ventas: 0, Total_Gastos: 0, Beneficio_Neto: 0 };\n  }\n\n  const valor = parseFloat(String(d.Monto).replace(',', '.')) || 0;\n\n  if (d.Tipo === \"Venta\" || d.Tipo === \"Devolución_Favor\") {\n    sumatorio[idUnico].Total_Ventas += valor;\n  } else if (d.Tipo === \"Compra\" || d.Tipo === \"Publicidad\" || d.Tipo === \"Devolución_Contra\" || d.Tipo === \"Envío\") {\n    sumatorio[idUnico].Total_Gastos += valor;\n  }\n\n  sumatorio[idUnico].Beneficio_Neto = sumatorio[idUnico].Total_Ventas - sumatorio[idUnico].Total_Gastos;\n});\n\nreturn Object.values(sumatorio).map(resumen => ({ json: resumen }));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1040,
+        -240
+      ],
+      "id": "d86bbedc-e0b9-4204-ba23-33bbc2c357c3",
+      "name": "Contabilidad Mensual"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1EacTdJFv6V010pzdGFh1he3uKJXkzC0yj7bW3_SLBLc",
+          "mode": "list",
+          "cachedResultName": "Contabilidad Compra-Venta",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1EacTdJFv6V010pzdGFh1he3uKJXkzC0yj7bW3_SLBLc/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "COMPRA-VENTA",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1EacTdJFv6V010pzdGFh1he3uKJXkzC0yj7bW3_SLBLc/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        816,
+        -304
+      ],
+      "id": "73fc32a9-7d37-4765-8e10-861524f11b00",
+      "name": "Lectura Acumulativo",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "lU4uBUA7OP02Txfm",
+          "name": "Google Sheets JM"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// 1. Obtenemos la salida del Agente y limpiamos posibles bloques de código Markdown\nconst raw = $node[\"AI Agent\"].json.output.replace(/```json|```/g, \"\").trim();\n\nlet data;\ntry {\n  // 2. Intentamos convertir el texto en un objeto JSON real\n  data = JSON.parse(raw);\n} catch (e) {\n  // Si la IA devuelve algo que no es JSON, generamos un error controlado\n  data = { \n    Tipo: \"Error\", \n    Concepto: \"Error de lectura IA\", \n    Monto: 0, \n    Plataforma: \"Vinted\" \n  };\n}\n\n// 3. Limpieza extra del Monto (por si viene con comas en lugar de puntos)\nlet montoNumerico = 0;\nif (data.Monto) {\n  montoNumerico = parseFloat(String(data.Monto).replace(',', '.'));\n}\n\n// 4. Devolvemos el resultado listo para Google Sheets\nreturn {\n  json: {\n    // Usamos el formato YYYY-MM-DD para que el nodo de lectura posterior no de \"undefined\"\n    Fecha: new Date().toISOString().split('T')[0], \n    Tipo: data.Tipo || \"Desconocido\",\n    Concepto: data.Concepto || \"Sin descripción\",\n    Monto: isNaN(montoNumerico) ? 0 : montoNumerico,\n    Plataforma: data.Plataforma || \"Vinted\"\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        368,
+        -304
+      ],
+      "id": "4bbe1613-ca8a-48c4-a8c8-b8d4392b4c3b",
+      "name": "Selección DATA"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "16880144-a484-479f-925f-a4fdca28cf8b",
+              "leftValue": "={{ $json.messages[0].from }}",
+              "rightValue": "34669860966",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -208,
+        -304
+      ],
+      "id": "497d50c3-2371-406a-9ce4-9b1198e7b745",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1EacTdJFv6V010pzdGFh1he3uKJXkzC0yj7bW3_SLBLc",
+          "mode": "list",
+          "cachedResultName": "Contabilidad Compra-Venta",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1EacTdJFv6V010pzdGFh1he3uKJXkzC0yj7bW3_SLBLc/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1548346629,
+          "mode": "list",
+          "cachedResultName": "BALANCE DE RESULTADOS",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1EacTdJFv6V010pzdGFh1he3uKJXkzC0yj7bW3_SLBLc/edit#gid=1548346629"
+        },
+        "options": {
+          "dataLocationOnSheet": {
+            "values": {
+              "rangeDefinition": "specifyRangeA1",
+              "range": "H1:H2"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1696,
+        -240
+      ],
+      "id": "21731cce-4de0-4531-924b-5bb485b323ab",
+      "name": "Balance Total Neto",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "lU4uBUA7OP02Txfm",
+          "name": "Google Sheets JM"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1856,
+        -352
+      ],
+      "id": "a28d0e1e-c3f4-4f89-b070-a760140c5e87",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "jsCode": "// 1. Obtenemos todos los datos que vienen del Merge\nconst items = $input.all();\n\nlet totalVentas = 0;\nlet totalCompras = 0;\nlet totalPublicidad = 0;\nlet totalDevoFavor = 0;\nlet totalDevoContra = 0;\nlet totalEnvios = 0;\nlet valorBalanceRaw = null;\n\n// 2. Procesamos TODO en un solo bucle\nfor (let item of items) {\n  const data = item.json;\n  const tipo = String(data[\"Tipo\"] || \"\");\n\n  // Contadores exactos según las nuevas categorías\n  if (tipo === \"Venta\") totalVentas++;\n  if (tipo === \"Compra\") totalCompras++;\n  if (tipo === \"Publicidad\") totalPublicidad++;\n  if (tipo === \"Devolución_Favor\") totalDevoFavor++;\n  if (tipo === \"Devolución_Contra\") totalDevoContra++;\n  if (tipo === \"Envío\") totalEnvios++;\n\n  // 3. Buscamos el Balance Neto Total\n  for (let key in data) {\n    if (key.trim() === \"Beneficio Neto Total\" && valorBalanceRaw === null) {\n      valorBalanceRaw = data[key];\n    }\n  }\n}\n\n// 4. Formateo profesional de la moneda\nlet beneficioFinal = \"0,00 €\";\nif (valorBalanceRaw !== null) {\n  beneficioFinal = Number(valorBalanceRaw).toLocaleString('es-ES', { \n    style: 'currency', \n    currency: 'EUR' \n  });\n}\n\n// 5. Construcción del mensaje con las nuevas categorías\nconst mensajeFinal = `📊 *RESUMEN DE ACTIVIDAD*\n--------------------------\n💰 *Ventas:* ${totalVentas}\n🛒 *Compras:* ${totalCompras}\n📢 *Publicidad:* ${totalPublicidad}\n\n🔄 *DEVOLUCIONES:*\n✅ *A favor (recuperado):* ${totalDevoFavor}\n❌ *En contra (devuelto):* ${totalDevoContra}\n\n🚚 *ENVÍOS:*\n📦 *Gastos de envío:* ${totalEnvios}\n\n━━━━━━━━━━━━━━━━━━\n💵 *BALANCE NETO TOTAL:*\n👉 *${beneficioFinal}*\n━━━━━━━━━━━━━━━━━━\n\n✅ Registro completado con éxito.`;\n\nreturn [\n  {\n    json: {\n      mensaje_whatsapp: mensajeFinal,\n      datos: {\n        ventas: totalVentas,\n        compras: totalCompras,\n        publicidad: totalPublicidad,\n        devoluciones_favor: totalDevoFavor,\n        devoluciones_contra: totalDevoContra,\n        envios: totalEnvios,\n        balance: beneficioFinal\n      }\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2048,
+        -352
+      ],
+      "id": "f8b5397a-6635-4529-9d1a-c6c229d58748",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "operation": "send",
+        "phoneNumberId": "868213073051824",
+        "recipientPhoneNumber": "+34669860966",
+        "textBody": "={{ $json.mensaje_whatsapp }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1.1,
+      "position": [
+        2240,
+        -352
+      ],
+      "id": "72c47200-6f64-4c7a-bf88-6b92ae6c9795",
+      "name": "Mensaje Respuesta",
+      "webhookId": "218b1dc1-c753-4794-99a9-fb1df8151fbf",
+      "executeOnce": true,
+      "credentials": {
+        "whatsAppApi": {
+          "id": "HRjH1DF7s15I6OSf",
+          "name": "Cuenta Wa"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [
+        1472,
+        -240
+      ],
+      "id": "a93de06e-ed62-4696-a5b5-331206d92f5f",
+      "name": "Limit"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "WhatsApp Trigger": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Selección DATA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Compra-Venta": {
+      "main": [
+        [
+          {
+            "node": "Lectura Acumulativo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Contabilidad Mensual": {
+      "main": [
+        [
+          {
+            "node": "Balance de resultados",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Lectura Acumulativo": {
+      "main": [
+        [
+          {
+            "node": "Contabilidad Mensual",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Balance de resultados": {
+      "main": [
+        [
+          {
+            "node": "Limit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Selección DATA": {
+      "main": [
+        [
+          {
+            "node": "Compra-Venta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Balance Total Neto": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Mensaje Respuesta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limit": {
+      "main": [
+        [
+          {
+            "node": "Balance Total Neto",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "7161b41d-4d39-4785-9f0d-e5e24f81e6b0",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "53bd91e5f8d337550dc0be0a8cd62ea1859faf97ea01c3564832375a2e96d4c0"
+  },
+  "id": "DabgO3HhJ3CLB3nPtV125",
+  "tags": []
+}

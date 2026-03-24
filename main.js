@@ -71,11 +71,23 @@ class Dashboard {
             const result = await resp.json();
             
             if (result && result.business) {
-                // Autocorrect logic for stale n8n mappers
+                // Autocorrect logic for maximum robustness
                 this.data.business.transactions = (result.business.transactions || []).map(t => {
                     let type = t.type;
                     const concept = (t.item || '').toUpperCase();
-                    if (type === 'Venta') {
+                    const rawTypeGSheet = (t.raw_type || '').toUpperCase();
+                    
+                    // Priority 1: Check GSheet raw type if available
+                    if (rawTypeGSheet.includes('ENVI') || rawTypeGSheet.includes('SHIPPING')) type = 'Envío';
+                    else if (rawTypeGSheet.includes('DEVOL')) {
+                        if (rawTypeGSheet.includes('FAVOR')) type = 'Devolución a favor';
+                        else type = 'Devolución en contra';
+                    }
+                    else if (rawTypeGSheet.includes('COMPRA')) type = 'Compra';
+                    else if (rawTypeGSheet.includes('ADS') || rawTypeGSheet.includes('PUBLICIDAD')) type = 'Publicidad';
+                    
+                    // Priority 2: Fallback to keyword matching in concept (item)
+                    if (type === 'Venta' || !type) {
                         if (concept.includes('ENVIO') || concept.includes('ENVÍO')) type = 'Envío';
                         else if (concept.includes('DEVOLUCION') || concept.includes('DEVOLUCIÓN')) {
                             if (concept.includes('FAVOR')) type = 'Devolución a favor';

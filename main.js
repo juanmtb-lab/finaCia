@@ -271,13 +271,18 @@ class Dashboard {
         }).join('') || '<tr><td colspan="5" style="text-align: center;">Sin transacciones</td></tr>';
     }
 
+    normalize(str) {
+        if (!str) return '';
+        return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase();
+    }
+
     isNegative(type) {
-        const t = (type || '').toUpperCase();
+        const t = this.normalize(type);
         return t.includes('COMPRA') || t.includes('PUBLICIDAD') || t.includes('ADS') || t.includes('ENVI') || t.includes('CONTRA');
     }
 
     getTypeClass(type) {
-        const t = (type || '').toUpperCase();
+        const t = this.normalize(type);
         if (t.includes('VENTA')) return 'emerald-tag';
         if (t.includes('COMPRA')) return 'rose-tag';
         if (t.includes('PUBLICIDAD') || t.includes('ADS')) return 'indigo-tag';

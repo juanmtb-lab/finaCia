@@ -71,7 +71,19 @@ class Dashboard {
             const result = await resp.json();
             
             if (result && result.business) {
-                this.data.business.transactions = result.business.transactions || [];
+                // Autocorrect logic for stale n8n mappers
+                this.data.business.transactions = (result.business.transactions || []).map(t => {
+                    let type = t.type;
+                    const concept = (t.item || '').toUpperCase();
+                    if (type === 'Venta') {
+                        if (concept.includes('ENVIO') || concept.includes('ENVÍO')) type = 'Envío';
+                        else if (concept.includes('DEVOLUCION') || concept.includes('DEVOLUCIÓN')) {
+                            if (concept.includes('FAVOR')) type = 'Devolución a favor';
+                            else type = 'Devolución en contra';
+                        }
+                    }
+                    return { ...t, type };
+                });
                 this.calculateBusinessMetrics();
             }
             
@@ -248,21 +260,19 @@ class Dashboard {
     }
 
     isNegative(type) {
-        return ['Compra', 'Publicidad', 'Envío', 'Devolución en contra'].includes(type);
+        const t = (type || '').toUpperCase();
+        return t.includes('COMPRA') || t.includes('PUBLICIDAD') || t.includes('ADS') || t.includes('ENVI') || t.includes('CONTRA');
     }
 
-
-
     getTypeClass(type) {
-        switch(type) {
-            case 'Venta': return 'emerald-tag';
-            case 'Compra': return 'rose-tag';
-            case 'Publicidad': return 'indigo-tag';
-            case 'Envío': return 'shipping-tag';
-            case 'Devolución a favor': return 'dev-favor-tag';
-            case 'Devolución en contra': return 'dev-contra-tag';
-            default: return '';
-        }
+        const t = (type || '').toUpperCase();
+        if (t.includes('VENTA')) return 'emerald-tag';
+        if (t.includes('COMPRA')) return 'rose-tag';
+        if (t.includes('PUBLICIDAD') || t.includes('ADS')) return 'indigo-tag';
+        if (t.includes('ENVI') || t.includes('SHIPPING')) return 'shipping-tag';
+        if (t.includes('DEVOL') && t.includes('FAVOR')) return 'dev-favor-tag';
+        if (t.includes('DEVOL') && (t.includes('CONTRA') || !t.includes('FAVOR'))) return 'dev-contra-tag';
+        return '';
     }
 }
 
